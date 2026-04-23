@@ -5,7 +5,7 @@
  */
 
 const GeminiService = {
-  MODELS: ['gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-2.0-flash'],
+  MODELS: ['gemini-2.0-flash-lite', 'gemini-1.5-flash-latest', 'gemini-2.0-flash'],
   _currentModelIndex: 0,
   API_BASE: 'https://generativelanguage.googleapis.com/v1beta/models',
 
@@ -199,19 +199,19 @@ BOUNDARIES:
           body: JSON.stringify(requestBody)
         });
 
-        if (response.status === 429) {
+        if (response.status === 429 || response.status === 404) {
           if (attempt < MAX_RETRIES) {
-            // After 2 fails on same model, try next model
-            if (attempt >= 1 && this._currentModelIndex < this.MODELS.length - 1) {
+            // Switch model immediately on 404, or after some retries on 429
+            if ((response.status === 404 || attempt >= 1) && this._currentModelIndex < this.MODELS.length - 1) {
               this._currentModelIndex++;
               console.log(`[VoteWise] Switching to fallback model: ${this.MODEL}`);
             }
             const delay = RETRY_DELAYS[attempt];
-            console.log(`[VoteWise] Rate limited (${this.MODEL}). Retrying in ${delay / 1000}s (attempt ${attempt + 1}/${MAX_RETRIES})...`);
+            console.log(`[VoteWise] Status ${response.status} (${this.MODEL}). Retrying in ${delay / 1000}s (attempt ${attempt + 1}/${MAX_RETRIES})...`);
             await this._sleep(delay);
             continue;
           }
-          throw new Error('RATE_LIMITED');
+          throw new Error(response.status === 429 ? 'RATE_LIMITED' : 'NETWORK_ERROR');
         }
 
         if (!response.ok) {
