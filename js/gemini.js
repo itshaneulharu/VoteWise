@@ -5,8 +5,11 @@
  */
 
 const GeminiService = {
-  MODEL: 'gemini-2.0-flash',
+  MODELS: ['gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-2.0-flash'],
+  _currentModelIndex: 0,
   API_BASE: 'https://generativelanguage.googleapis.com/v1beta/models',
+
+  get MODEL() { return this.MODELS[this._currentModelIndex]; },
 
   /**
    * The VoteWise system instruction sent to Gemini.
@@ -182,12 +185,15 @@ BOUNDARIES:
     };
 
     // Retry with exponential backoff for rate limits
-    const MAX_RETRIES = 3;
-    const RETRY_DELAYS = [2000, 5000, 10000]; // 2s, 5s, 10s
+    const MAX_RETRIES = 4;
+    const RETRY_DELAYS = [3000, 5000, 8000, 12000];
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      // Rebuild URL in case model changed
+      const currentUrl = `${this.API_BASE}/${this.MODEL}:generateContent?key=${apiKey}`;
+
       try {
-        const response = await fetch(url, {
+        const response = await fetch(currentUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody)
@@ -195,10 +201,15 @@ BOUNDARIES:
 
         if (response.status === 429) {
           if (attempt < MAX_RETRIES) {
+            // After 2 fails on same model, try next model
+            if (attempt >= 1 && this._currentModelIndex < this.MODELS.length - 1) {
+              this._currentModelIndex++;
+              console.log(`[VoteWise] Switching to fallback model: ${this.MODEL}`);
+            }
             const delay = RETRY_DELAYS[attempt];
-            console.log(`[VoteWise] Rate limited. Retrying in ${delay / 1000}s (attempt ${attempt + 1}/${MAX_RETRIES})...`);
+            console.log(`[VoteWise] Rate limited (${this.MODEL}). Retrying in ${delay / 1000}s (attempt ${attempt + 1}/${MAX_RETRIES})...`);
             await this._sleep(delay);
-            continue; // retry
+            continue;
           }
           throw new Error('RATE_LIMITED');
         }
