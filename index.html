@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoteWise — Your AI Election Guide</title>
+  <meta name="description" content="VoteWise is your friendly AI-powered election guide. Get step-by-step voting help, personalized checklists, and answers to all your election questions.">
+  <meta property="og:title" content="VoteWise — Your AI Election Guide">
+  <meta property="og:description" content="Understand elections, register to vote, and get personalized voting guidance with AI.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">🗳️</div>
+          <div>
+            <div class="logo-text">VoteWise</div>
+            <div class="logo-tagline">AI Election Guide</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="new-chat-btn" id="new-chat-btn">
+          <span>＋</span> New Chat
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-label">Quick Topics</div>
+        <ul class="nav-items">
+          <li class="nav-item" data-action="election">
+            <span class="nav-icon">🏛️</span> Election Process
+          </li>
+          <li class="nav-item" data-action="checklist">
+            <span class="nav-icon">✅</span> Voter Checklist
+          </li>
+          <li class="nav-item" data-action="booth">
+            <span class="nav-icon">📍</span> Polling Booth
+          </li>
+          <li class="nav-item" data-action="faq">
+            <span class="nav-icon">💬</span> Common Doubts
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="settings-btn" id="settings-btn">
+          <span>⚙️</span> API Key Settings
+        </button>
+      </div>
+    </aside>
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;"></div>
+
+    <!-- Main Chat -->
+    <main class="main">
+      <header class="chat-header">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="Toggle menu">☰</button>
+          <h1 class="chat-title">VoteWise Chat</h1>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" id="new-chat-header" title="New Chat" aria-label="New chat">🔄</button>
+        </div>
+      </header>
+
+      <div class="chat-messages" id="chat-messages">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcome-screen">
+          <div class="welcome-icon">🗳️</div>
+          <h2 class="welcome-title">Welcome to VoteWise</h2>
+          <p class="welcome-subtitle">Your personal AI election guide. Ask me anything about voting, elections, and your civic rights.</p>
+          <div class="quick-actions">
+            <button class="quick-action" data-action="election">
+              <span class="quick-action-icon">🏛️</span>
+              <div>
+                <div class="quick-action-label">Election Process</div>
+                <div class="quick-action-desc">Step-by-step guide to how elections work</div>
+              </div>
+            </button>
+            <button class="quick-action" data-action="checklist">
+              <span class="quick-action-icon">✅</span>
+              <div>
+                <div class="quick-action-label">Voter Checklist</div>
+                <div class="quick-action-desc">Get your personalized preparation list</div>
+              </div>
+            </button>
+            <button class="quick-action" data-action="booth">
+              <span class="quick-action-icon">📍</span>
+              <div>
+                <div class="quick-action-label">Polling Booth</div>
+                <div class="quick-action-desc">Find your booth & verify your registration</div>
+              </div>
+            </button>
+            <button class="quick-action" data-action="faq">
+              <span class="quick-action-icon">💬</span>
+              <div>
+                <div class="quick-action-label">Common Doubts</div>
+                <div class="quick-action-desc">Quick answers to first-time voter questions</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="chat-input-wrapper">
+          <textarea id="chat-input" placeholder="Ask me about elections, voting, registration..." rows="1"></textarea>
+          <button class="send-btn" id="send-btn" aria-label="Send message">➤</button>
+        </div>
+        <div class="input-hint">VoteWise is AI-powered. Always verify info with your local Election Commission.</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- API Key Modal -->
+  <div class="modal-overlay hidden" id="api-key-modal">
+    <div class="modal">
+      <div class="modal-icon">🔑</div>
+      <h2>Connect to AI</h2>
+      <p>VoteWise uses Google's Gemini AI to answer your questions. Enter your free API key to get started.</p>
+      <div class="modal-input-group">
+        <label for="api-key-input">Gemini API Key</label>
+        <input type="password" id="api-key-input" placeholder="Paste your API key here...">
+        <div class="input-hint">Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a></div>
+        <div class="modal-error" id="api-key-error"></div>
+      </div>
+      <button class="modal-btn" id="api-key-save">Start Chatting →</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/markdown.js"></script>
+  <script src="js/gemini.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Bind header new chat button -->
+  <script>
+    document.getElementById('new-chat-header').addEventListener('click', () => App._handleNewChat());
+    // Mobile sidebar overlay toggle
+    const overlay = document.getElementById('sidebar-overlay');
+    const sidebar = document.getElementById('sidebar');
+    const observer = new MutationObserver(() => {
+      overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+    });
+    observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+  </script>
+</body>
+</html>
